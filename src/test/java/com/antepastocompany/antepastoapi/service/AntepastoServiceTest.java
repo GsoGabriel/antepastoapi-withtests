@@ -57,8 +57,8 @@ public class AntepastoServiceTest {
         Antepasto expectedSavedAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
 
         // when
-        when(antepastoRepository.findById(expectedAntepastoDTO.getId())).thenReturn(Optional.empty());
-        when(antepastoRepository.save(expectedSavedAntepasto)).thenReturn(expectedSavedAntepasto);
+        when(antepastoRepository.findByFlavor(expectedAntepastoDTO.getFlavor())).thenReturn(Optional.empty());
+        when(antepastoRepository.save(any())).thenReturn(expectedSavedAntepasto);
 
         //then
         AntepastoDTO createdAntepastoDTO = antepastoService.createAntepasto(expectedAntepastoDTO);
