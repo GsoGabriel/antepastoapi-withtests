@@ -1,13 +1,11 @@
 package com.antepastocompany.antepastoapi.dto.request;
 
 import com.antepastocompany.antepastoapi.enums.Spicy;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-
+import javax.validation.constraints.NotNull;
 
 @Builder
 @AllArgsConstructor
@@ -16,9 +14,10 @@ public class AntepastoDTO {
 
     private Long id;
 
-    @NotEmpty
+    @NotNull
     private String flavor;
 
+    @NotNull
     private String spicy;
 
     @NotEmpty

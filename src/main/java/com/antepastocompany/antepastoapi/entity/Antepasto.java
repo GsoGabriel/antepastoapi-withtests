@@ -1,13 +1,12 @@
 package com.antepastocompany.antepastoapi.entity;
 
 import com.antepastocompany.antepastoapi.enums.Spicy;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Builder
@@ -22,7 +21,7 @@ public class Antepasto {
     @Column(nullable = false, unique = true)
     private String flavor;
 
-    @Enumerated(EnumType.STRING)
+
     @Column(nullable = false)
     private Spicy spicy;
 
