@@ -3,8 +3,10 @@ package com.antepastocompany.antepastoapi.service;
 import com.antepastocompany.antepastoapi.builder.AntepastoDTOBuilder;
 
 import com.antepastocompany.antepastoapi.dto.request.AntepastoDTO;
+import com.antepastocompany.antepastoapi.dto.response.MessageResponseDTO;
 import com.antepastocompany.antepastoapi.entity.Antepasto;
 import com.antepastocompany.antepastoapi.exceptions.AntepastoAlreadyRegisteredException;
+import com.antepastocompany.antepastoapi.exceptions.AntepastoNotFoundException;
 import com.antepastocompany.antepastoapi.mapper.AntepastoMapper;
 import com.antepastocompany.antepastoapi.repository.AntepastoRepository;
 import org.hamcrest.MatcherAssert;
@@ -68,4 +70,140 @@ public class AntepastoServiceTest {
         assertThat(createdAntepastoDTO.getQuantity(), is(equalTo(expectedAntepastoDTO.getQuantity())));
 
     }
+
+    @Test
+    void whenAntepastoInformedAlreadyExistsThenItMustThrowsAnException() {
+        // given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto duplicatedAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        // when
+        when(antepastoRepository.findByFlavor(expectedAntepastoDTO.getFlavor())).thenReturn(Optional.of(duplicatedAntepasto));
+
+        // then
+        assertThrows(AntepastoAlreadyRegisteredException.class, () -> antepastoService.createAntepasto(expectedAntepastoDTO));
+    }
+
+    @Test
+    void whenListAntepastoIsCalledThenReturnAList() throws AntepastoAlreadyRegisteredException{
+        // given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto expectedFoundAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        // when
+        when(antepastoRepository.findAll()).thenReturn(Collections.singletonList(expectedFoundAntepasto));
+
+        // then
+        List<AntepastoDTO> expectedList = antepastoService.listAll();
+
+        assertThat(expectedList, is(not(empty())));
+        assertThat(expectedList.get(0).getFlavor(), is(equalTo(expectedFoundAntepasto.getFlavor())));
+    }
+
+    @Test
+    void whenAntepastoIdIsGivenThenReturnAAntepasto() throws AntepastoNotFoundException {
+        // given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto expectedFoundAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        // when
+        when(antepastoRepository.findById(expectedAntepastoDTO.getId())).thenReturn(Optional.of(expectedFoundAntepasto));
+
+        // then
+        AntepastoDTO antepastoDTO = antepastoService.getById(expectedAntepastoDTO.getId());
+
+        assertThat(antepastoDTO.getFlavor(), is(equalTo(expectedFoundAntepasto.getFlavor())));
+    }
+
+    @Test
+    void whenAntepastoFlavorIsGivenThenReturnAAntepasto() throws AntepastoNotFoundException {
+        // given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto expectedFoundAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        // when
+        when(antepastoRepository.findByFlavor(expectedAntepastoDTO.getFlavor())).thenReturn(Optional.of(expectedFoundAntepasto));
+
+        // then
+        AntepastoDTO antepastoDTO = antepastoService.getByFlavor(expectedAntepastoDTO.getFlavor());
+
+        assertThat(antepastoDTO.getFlavor(), is(equalTo(expectedFoundAntepasto.getFlavor())));
+    }
+
+    @Test
+    void whenNotRegisteredAntepastoFlavorIsGivenThenThrowsAnException() throws AntepastoNotFoundException {
+        // given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto expectedFoundAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        // when
+        when(antepastoRepository.findByFlavor(expectedAntepastoDTO.getFlavor())).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(AntepastoNotFoundException.class, () -> antepastoService.getByFlavor(expectedAntepastoDTO.getFlavor()));
+        assertThrows(AntepastoNotFoundException.class, () -> antepastoService.updateAntepastoByFlavor(expectedAntepastoDTO.getFlavor(), expectedAntepastoDTO));
+    }
+
+    @Test
+    void whenNotRegisteredAntepastoIdIsGivenThenThrowsAnException() throws AntepastoNotFoundException {
+        // given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto expectedFoundAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        // when
+        when(antepastoRepository.findById(expectedAntepastoDTO.getId())).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(AntepastoNotFoundException.class, () -> antepastoService.getById(expectedAntepastoDTO.getId()));
+        assertThrows(AntepastoNotFoundException.class, () -> antepastoService.updateAntepastoById(expectedAntepastoDTO.getId(), expectedAntepastoDTO));
+    }
+
+    @Test
+    void whenAntepastoIdAndAntepastoDTOIsGivenThenReturnAMessageResponse() throws AntepastoNotFoundException {
+        //given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto expectedFoundAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        //when
+        when(antepastoRepository.findById(expectedAntepastoDTO.getId())).thenReturn(Optional.of(expectedFoundAntepasto));
+        when(antepastoRepository.save(any())).thenReturn(expectedFoundAntepasto);
+
+        //then
+        MessageResponseDTO messageResponse = antepastoService.updateAntepastoById(expectedAntepastoDTO.getId(), expectedAntepastoDTO);
+
+        assertThat(messageResponse.getMessage(), is(equalTo("Updated antepasto with flavor " + expectedFoundAntepasto.getFlavor())));
+    }
+
+    @Test
+    void whenAntepastoFlavorAndAntepastoDTOIsGivenThenReturnAMessageResponse() throws AntepastoNotFoundException {
+        //given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto expectedFoundAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        //when
+        when(antepastoRepository.findByFlavor(expectedAntepastoDTO.getFlavor())).thenReturn(Optional.of(expectedFoundAntepasto));
+        when(antepastoRepository.save(any())).thenReturn(expectedFoundAntepasto);
+
+        //then
+        MessageResponseDTO messageResponse = antepastoService.updateAntepastoByFlavor(expectedAntepastoDTO.getFlavor(), expectedAntepastoDTO);
+
+        assertThat(messageResponse.getMessage(), is(equalTo("Updated antepasto with flavor " + expectedFoundAntepasto.getFlavor())));
+    }
+
+    @Test
+    void whenExclusionIsCalledWithValidAntepastoIdThenItShoudBeDeleted() throws AntepastoNotFoundException {
+        //given
+        AntepastoDTO expectedAntepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        Antepasto expectedDeletedAntepasto = antepastoMapper.toModel(expectedAntepastoDTO);
+
+        // when
+        when(antepastoRepository.findById(expectedAntepastoDTO.getId())).thenReturn(Optional.of(expectedDeletedAntepasto));
+
+        //then
+        antepastoService.delete(expectedAntepastoDTO.getId());
+
+        verify(antepastoRepository, times(1)).findById(expectedAntepastoDTO.getId());
+        verify(antepastoRepository, times(1)).deleteById(expectedAntepastoDTO.getId());
+    }
+
 }

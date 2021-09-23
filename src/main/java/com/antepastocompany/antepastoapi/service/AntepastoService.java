@@ -34,14 +34,24 @@ public class AntepastoService {
         return antepastoMapper.toDTO(savedAntepasto);
     }
 
-    private void verifyIfIsAlreadyRegistered(String flavor) throws AntepastoAlreadyRegisteredException{
-        Optional<Antepasto> optSavedBeer = antepastoRepository.findByFlavor(flavor);
-        if (optSavedBeer.isPresent()) {
-            throw new AntepastoAlreadyRegisteredException(flavor);
-        }
+    public List<AntepastoDTO> listAll() {
+        return antepastoRepository.findAll()
+                .stream()
+                .map(antepastoMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public MessageResponseDTO updateAntepastoById(Long id, AntepastoDTO antepastoDTO) throws AntepastoNotFoundException{
+    public AntepastoDTO getById(Long id) throws AntepastoNotFoundException {
+        Antepasto antepasto = verifyIfExists(id);
+        return antepastoMapper.toDTO(antepasto);
+    }
+
+    public AntepastoDTO getByFlavor(String flavor) throws AntepastoNotFoundException {
+        Antepasto antepasto = verifyIfExists(flavor);
+        return antepastoMapper.toDTO(antepasto);
+    }
+
+    public MessageResponseDTO updateAntepastoById(Long id, AntepastoDTO antepastoDTO) throws AntepastoNotFoundException {
         verifyIfExists(id);
 
         Antepasto antepastoToSave = antepastoMapper.toModel(antepastoDTO);
@@ -50,7 +60,7 @@ public class AntepastoService {
         return createMessageResponse("Updated antepasto with flavor ", savedAntepasto);
     }
 
-    public MessageResponseDTO updateAntepastoByFlavor(String flavor, AntepastoDTO antepastoDTO) throws AntepastoNotFoundException{
+    public MessageResponseDTO updateAntepastoByFlavor(String flavor, AntepastoDTO antepastoDTO) throws AntepastoNotFoundException {
         verifyIfExists(flavor);
 
         Antepasto antepastoToSave = antepastoMapper.toModel(antepastoDTO);
@@ -59,33 +69,23 @@ public class AntepastoService {
         return createMessageResponse("Updated antepasto with flavor ", savedAntepasto);
     }
 
+    public void delete(Long id) throws AntepastoNotFoundException {
+        verifyIfExists(id);
+        antepastoRepository.deleteById(id);
+    }
+
+    private void verifyIfIsAlreadyRegistered(String flavor) throws AntepastoAlreadyRegisteredException {
+        Optional<Antepasto> optSavedBeer = antepastoRepository.findByFlavor(flavor);
+        if (optSavedBeer.isPresent()) {
+            throw new AntepastoAlreadyRegisteredException(flavor);
+        }
+    }
+
     private MessageResponseDTO createMessageResponse(String string, Antepasto savedAntepasto) {
         return MessageResponseDTO
                 .builder()
                 .message(string + savedAntepasto.getFlavor())
                 .build();
-    }
-
-    public List<AntepastoDTO> listAll(){
-        List<Antepasto> antepastoList = antepastoRepository.findAll();
-        return antepastoList.stream()
-                .map(antepastoMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public AntepastoDTO getById(Long id) throws AntepastoNotFoundException{
-        Antepasto antepasto = verifyIfExists(id);
-        return antepastoMapper.toDTO(antepasto);
-    }
-
-    public AntepastoDTO getByFlavor(String flavor) throws AntepastoNotFoundException{
-        Antepasto antepasto = verifyIfExists(flavor);
-        return antepastoMapper.toDTO(antepasto);
-    }
-
-    public void delete(Long id) throws AntepastoNotFoundException{
-        verifyIfExists(id);
-        antepastoRepository.deleteById(id);
     }
 
     private Antepasto verifyIfExists(Long id) throws AntepastoNotFoundException {
