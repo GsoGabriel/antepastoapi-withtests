@@ -69,17 +69,15 @@ public class AntepastoControllerTest {
     }
 
     @Test
-    void whenPOSTIsCalledWithoutRequiredFieldThenReturnAnError() throws AntepastoAlreadyRegisteredException, Exception {
+    void whenPOSTIsCalledWithoutRequiredFieldThenReturnAnError() throws Exception {
         //given
-        AntepastoDTOBuilder antepastoDTOBuilder = new AntepastoDTOBuilder();
-        antepastoDTOBuilder.setFlavor(null);
-        AntepastoDTO antepastoDTO = antepastoDTOBuilder.toAntepastoDTO();
-
+        AntepastoDTO antepastoDTO = AntepastoDTOBuilder.builder().build().toAntepastoDTO();
+        antepastoDTO.setFlavor(null);
 
         mockMvc.perform(post(ANTEPASTO_API_URL_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(antepastoDTO)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
 
     }
 }

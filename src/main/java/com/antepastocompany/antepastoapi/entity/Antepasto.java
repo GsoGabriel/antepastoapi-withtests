@@ -21,11 +21,10 @@ public class Antepasto {
     @Column(nullable = false, unique = true)
     private String flavor;
 
-
     @Column(nullable = false)
     private Spicy spicy;
 
-    @Column
+    @Column(nullable = false)
     private int quantity;
 
     @Column(nullable = false)

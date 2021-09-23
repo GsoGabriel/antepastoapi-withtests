@@ -8,25 +8,23 @@ import com.antepastocompany.antepastoapi.service.AntepastoService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.executable.ValidateOnExecution;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/antepasto")
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class AntepastoController {
 
     private AntepastoService antepastoService;
 
-    @Autowired
-    public AntepastoController(AntepastoService antepastoService) {
-        this.antepastoService = antepastoService;
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AntepastoDTO createAntepasto(@RequestBody AntepastoDTO antepastoDTO) throws AntepastoAlreadyRegisteredException {
+    public AntepastoDTO createAntepasto(@RequestBody @Valid AntepastoDTO antepastoDTO) throws AntepastoAlreadyRegisteredException {
         return antepastoService.createAntepasto(antepastoDTO);
     }
 
